@@ -72,7 +72,14 @@ pdf("/public/workspace/lily/CTN/version_3_20/rs_plot/Fig5_TSNE_plot.pdf",useDing
 DimPlot(dat)
 dev.off()
 
+# 2023-1-3
+# set umap 
+dat <- readRDS("/public/workspace/lily/CTN/version_3_20/data/CD14Mono.RDS")
+dat <- RunUMAP(dat,dims=1:10)
 
+pdf("/public/workspace/lily/CTN/version_3_20/rs_plot/Fig6_Mono_umap_plot.pdf",useDingbats=F)
+DimPlot(dat,label=T,label.size=8,raster=T)
+dev.off()
 
 
 
@@ -149,7 +156,8 @@ sub.dat$Term <- factor(sub.dat$Term,levels=rev(sub.dat$Term))
 
 pdf("/public/workspace/lily/CTN/version_3_20/rs_plot/SC_CTN_CD14mono_up_DEG_GO_enrich.pdf",useDingbats=F,width=10)
 ggplot(sub.dat,aes(x=Term,y=Odds.Ratio,fill=logP))+
-geom_bar(stat="identity",position = position_dodge(0.5),width=0.5) + coord_flip() + scale_fill_gradientn(colours=c("grey","red"))
+geom_bar(stat="identity",position = position_dodge(0.5),width=0.5) + coord_flip() 
+# + scale_fill_gradientn(colours=c("grey","red"))
 dev.off()
 
 

@@ -25,8 +25,32 @@ DimPlot(dat,group.by="celltype",cols=col,raster=F,reduction="tsne")
 dev.off()
 
 
+# 2022-12-29
+# plot by umap 
+dat <- RunUMAP(dat,dims=1:10)
+
+col <- c("#f47b7b","#91be3e","#96cbb3","#836eaa","#39a6dd","#207c88","#e5352b","#ef9020","#dde2e0","#d4d7da")
+
+pdf("/public/workspace/lily/CTN/version_3_20/rs_plot/Fig1_overview_umap.pdf",width=8,useDingbats=F)
+DimPlot(dat,group.by="celltype",cols=col,raster=T,reduction="umap")
+dev.off()
 
 
+# 2023-1-4
+# supplementary plot 
+library(Seurat)
+dat <- readRDS("/public/workspace/lily/CTN/version_3_20/data/CTN_inte.RDS")
+dat <- RunUMAP(dat,dims=1:10)
+
+pdf("/public/workspace/lily/CTN/version_3_20/rs_plot/supplmentary/CTN_inte_FeaturePlot_umap.pdf",useDingbats=F)
+DimPlot(dat,raster=T,reduction="umap")
+DimPlot(dat,group.by="sample",raster=T,reduction="umap")
+DimPlot(dat,group.by="group",cols=c("#003468","#5ec6f2","#4b1702"),raster=T,reduction="umap")
+
+FeaturePlot(dat,features=c("CD3D","CD3E","MS4A1","CD79A"),raster=T,reduction="umap") # T cell 
+FeaturePlot(dat,features=c("KLRD1","NKG7","CD14","MS4A7"),raster=T,reduction="umap") # B cell  Plasma
+FeaturePlot(dat,features=c("TOP2A","MKI67","GP9","PF4"),raster=T,reduction="umap") # Prolifering Cells
+dev.off()
 
 
 # 2. cell type in different group cells
@@ -38,6 +62,11 @@ DimPlot(dat,cells=which(dat$group=="SC"),reduction="tsne",group.by="celltype",co
 dev.off()
 
 
+pdf("/public/workspace/lily/CTN/version_3_20/rs_plot/Fig1_celltype_group_umap.pdf",width=8,useDingbats=F)
+DimPlot(dat,cells=which(dat$group=="Elder"),reduction="umap",group.by="celltype",cols=col,raster=T)+labs(title="Elder") # control
+DimPlot(dat,cells=which(dat$group=="CTN"),reduction="umap",group.by="celltype",cols=col,raster=T)+labs(title="Centenarian") # cetenraian
+DimPlot(dat,cells=which(dat$group=="SC"),reduction="umap",group.by="celltype",cols=col,raster=T)+labs(title="Supercentenarian") # supercentenarain
+dev.off()
 
 
 
@@ -128,17 +157,56 @@ dev.off()
 
 
 
+# 2022-12-29
+# change group color 
+# young, Elder,CTN,SC
+# "#d4c78c","#5ec6f2","#003468","#4b1702"
+# and subsample to calculate 
+
+library(Seurat)
+dat <- readRDS("/public/workspace/lily/CTN/version_3_20/data/CTN_inte.RDS")
+dat <- RunUMAP(dat,dims=1:10)
+
+Tsub <- subset(dat,cells=which(dat$celltype=="T cell"))
+
+dat1 <- c()
+dat2 <- c()
+dat3 <- c()
+
+i=1
+while(i <= 10){
+    set.seed(123*i)
+    cellsElder <- sample(which(Tsub$group=="Elder"),5000)
+    # print(head(cellsElder))
+    TsubElder <- subset(dat,cells=cellsElder)
+    set.seed(1234*i)
+    cellsCTN <- sample(which(Tsub$group=="CTN"),5000)
+    TsubCTN <- subset(dat,cells=cellsCTN)
+    set.seed(12345*i)
+    cellsSC <- sample(which(Tsub$group=="SC"),5000)
+    TsubSC <- subset(dat,cells=cellsSC)
+
+    dat1 <- c(dat1,length(which(TsubElder$seurat_clusters%in%c(3,8)))/5000)
+    dat2 <- c(dat2,length(which(TsubCTN$seurat_clusters%in%c(3,8)))/5000)
+    dat3 <- c(dat3,length(which(TsubSC$seurat_clusters%in%c(3,8)))/5000)
+    i=i+1
+}
+
+pdat <- data.frame(percent=c(dat1,dat2,dat3),group=c(rep(c("Elder","CTN","SC"),each=10)))
+pdat$group <- factor(pdat$group,levels=c("Elder","CTN","SC"))
+
+pdf("/public/workspace/lily/CTN/version_3_20/rs_plot/Fig1_sample_Tcellsubset.pdf",useDingbats=F)
+# boxplot(percent~group,data=pdat,names=c("Elder","CTN","SC"),main="cell percentage in TG1",ylims=c(0.05,0.25),outline=F)
+barplot(c(mean(dat1),mean(dat2),mean(dat3)),names=c("Elder","CTN","SC"),main="cell percentage in TG1",ylim=c(0,1))
+beeswarm::beeswarm(percent~group,data=pdat,col = 4, pch = 16,add = TRUE)
+dev.off()
 
 
-
-
-
-
-
-
-
-
-
+pdf("/public/workspace/lily/CTN/version_3_20/rs_plot/Fig1_sample_Tcellsubset_long.pdf",useDingbats=F)
+# boxplot(percent~group,data=pdat,names=c("Elder","CTN","SC"),main="cell percentage in TG1",ylims=c(0.05,0.25),outline=F)
+barplot(c(mean(1-dat1),mean(1-dat2),mean(1-dat3)),names=c("Elder","CTN","SC"),main="cell percentage in TG1",ylim=c(0,1))
+beeswarm::beeswarm((1-percent)~group,data=pdat,col = 4, pch = 16,add = TRUE)
+dev.off()
 
 
 

@@ -84,8 +84,24 @@ saveRDS(inte,file="/public/workspace/lily/CTN/version_3_20/data/NK.pure.RDS")
 
 
 
+# 2023-1-3
+# plot umap result 
+dat <- readRDS("/public/workspace/lily/CTN/version_3_20/data/NK.pure.RDS")
+ DefaultAssay(dat) <- "integrated"
+ dat <- RunUMAP(dat,dims=1:10)
 
+pdf("/public/workspace/lily/CTN/version_3_20/rs_plot/NK_overview_umap.pdf",useDingbats=F)
+DimPlot(dat,raster=T,label=T,label.size=8)
+dev.off()
 
+# plot CD56 signature score
+library(ggplot2)
+mod <- readRDS("/public/workspace/lily/CTN/version_3_20/data/NKCD56_mod.RDS")
+dat$CD56bri <- mod[,3]
+pdf("/public/workspace/lily/CTN/version_3_20/rs_plot/NK_CD56score_umap.pdf",useDingbats=F)
+FeaturePlot(dat,feature="CD56bri",raster=T)+
+    scale_colour_gradientn(colours =  c("#3299cc","#3299cc","white","white","#E41A1C","#E41A1C"),values = c(0,0.5,0.5,0.55,1.0))
+dev.off()
 
 
 #####################################################################################################################################################

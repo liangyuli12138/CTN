@@ -130,7 +130,7 @@ tmp.dat <- orderCells(tmp.dat)
 # check trajectory result 
 pdf("/public/workspace/lily/CTN/version_3_20/trajectory/Bcell_trajectory.pdf")
 plot_cell_trajectory(tmp.dat,color_by="celltype.refine")+scale_colour_manual(values=c("#ffc845","#00c16e","#f85a40","#7d3f98"))
-plot_cell_trajectory(tmp.dat,color_by="group")
+plot_cell_trajectory(tmp.dat,color_by="group")+scale_colour_manual(values=c("#003468","#5ec6f2","#4b1702"))
 plot_cell_trajectory(tmp.dat,color_by="sample") +facet_wrap(~sample, nrow = 3)
 dev.off()
 
@@ -177,6 +177,23 @@ FeaturePlot(dat,features=c("CD38", "TNFRSF17","IGHG1","CD27"),order=T) # plasma 
 dev.off()
 
 
+# 2023-1-3
+# update to umap
+dat <- readRDS("/public/workspace/lily/CTN/version_3_20/data/Bcell.RDS")
+DefaultAssay(dat) <- "integrated"
+dat <- RunUMAP(dat,dims=1:10)
+DefaultAssay(dat) <- "RNA"
+
+pdf("/public/workspace/lily/CTN/version_3_20/rs_plot/Fig4_overview_umap.pdf",useDingbats=F)
+DimPlot(dat,group.by="celltype.new",cols=cols,reduction="umap",raster=T)
+FeaturePlot(dat,features=c("CD22","TCL1A","MS4A1"),order=T,raster=T) # naive B cell 
+FeaturePlot(dat,features=c("CD38", "TNFRSF17","IGHG1","CD27"),order=T,raster=T) # plasma and memeory B cell (CD27)
+dev.off()
+
+pdf("/public/workspace/lily/CTN/version_3_20/rs_plot/supplmentary/Fig5_Bcell_cluster_umap.pdf",useDingbats=F)
+DimPlot(dat,reduction="umap",raster=T)
+
+dev.off()
 
 
 #==========================================================================================================================================
